@@ -41,7 +41,7 @@ class ChatterBox(commands.Cog):
             return
 
         if self.bot.user.mentioned_in(message):
-            response = self.response_from_eliza(message.content)
+            response = self.response_from_alice(message.content)
             async with message.channel.typing():
                 await asyncio.sleep(random.randint(1, 3))
                 await message.channel.send(f"{author.mention} {response}")
