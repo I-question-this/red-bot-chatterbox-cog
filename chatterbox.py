@@ -108,7 +108,7 @@ class ChatterBox(commands.Cog):
         # Load up default ALICE
         self.alice = aiml.Kernel()
         self.alice.setTextEncoding(None)
-        chdir = os.path.join( aiml.__path__[0],'botdata','standard' )
+        chdir = os.path.join( aiml.__path__[0],'botdata','alice' )
         self.alice.bootstrap(learnFiles="startup.xml", commands="load alice", chdir=chdir)
         # Setup/load brain file
         self.alice_brain = os.path.join(cog_data_path(), "ChatterBox/alice.brain")
@@ -153,3 +153,4 @@ class ChatterBox(commands.Cog):
         embed = discord.Embed.from_dict(response)
         # Send embed
         return await ctx.send(embed=embed)
+
