@@ -28,8 +28,7 @@ class ChatterBox(commands.Cog):
     @commands.Cog.listener()
     async def on_message(self, message: discord.message) -> None:
         """Listen to every message ever.
-        This is how the bot will respond to button pushes.
-        It will only respond if the message is sent within a registered channel though.
+        This will only respond to message this bot is mentioned in however.
         """
         if isinstance(message.channel, discord.abc.PrivateChannel):
             return
@@ -96,9 +95,6 @@ class ChatterBox(commands.Cog):
 
 
     def response_from_alice(self, text:str) -> str:
-        # Clean out the message
-        for ch in  ['/', "'", ".", "\\", "(", ")", '"', '\n']:
-            text = text.replace(ch, '')
         response = self.alice.respond(text)
         self.alice.saveBrain(self.alice_brain)
         return response
@@ -110,6 +106,7 @@ class ChatterBox(commands.Cog):
         self.alice.setTextEncoding(None)
         chdir = os.path.join( aiml.__path__[0],'botdata','alice' )
         self.alice.bootstrap(learnFiles="startup.xml", commands="load alice", chdir=chdir)
+        self.alice.setBotPredicate("name", self.bot.user.mention)
         # Setup/load brain file
         self.alice_brain = os.path.join(cog_data_path(), "ChatterBox/alice.brain")
         if os.path.isfile(self.alice_brain):
