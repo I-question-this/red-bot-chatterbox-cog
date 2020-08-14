@@ -21,8 +21,13 @@ class ChatterBox(commands.Cog):
         super().__init__()
         self.bot = bot
         self._conf = Config.get_conf(None, 191919191, cog_name=f"{self.__class__.__name__}", force_registration=True)
+        self.alice_bot_brain = os.path.join(cog_data_path(), "ChatterBox/alice.brain")
+
+
+    @commands.Cog.listener()
+    async def on_ready(self):
         self.setup_alice()
-        self.eliza = Eliza()
+        self.eliza_bot = Eliza()
 
 
     @commands.Cog.listener()
@@ -52,7 +57,7 @@ class ChatterBox(commands.Cog):
 
 
     def response_from_eliza(self, text:str) -> str:
-        return self.eliza.respond(text)
+        return self.eliza_bot.respond(text)
 
 
     @eliza.command(name="speak")
@@ -95,26 +100,26 @@ class ChatterBox(commands.Cog):
 
 
     def response_from_alice(self, text:str) -> str:
-        response = self.alice.respond(text)
-        self.alice.saveBrain(self.alice_brain)
+        response = self.alice_bot.respond(text)
+        self.alice_bot.saveBrain(self.alice_bot_brain)
         return response
 
 
     def setup_alice(self):
         # Load up default ALICE
-        self.alice = aiml.Kernel()
-        self.alice.setTextEncoding(None)
+        self.alice_bot = aiml.Kernel()
+        self.alice_bot.setTextEncoding(None)
         chdir = os.path.join( aiml.__path__[0],'botdata','alice' )
-        self.alice.bootstrap(learnFiles="startup.xml", commands="load alice", chdir=chdir)
-        self.alice.setBotPredicate("name", self.bot.user.mention)
+        self.alice_bot.bootstrap(learnFiles="startup.xml", commands="load alice", chdir=chdir)
+        # Tell Alice it's name is the string Discord uses to mention users.
+        self.alice_bot.setBotPredicate("name", self.bot.user.mention)
         # Setup/load brain file
-        self.alice_brain = os.path.join(cog_data_path(), "ChatterBox/alice.brain")
-        if os.path.isfile(self.alice_brain):
+        if os.path.isfile(self.alice_bot_brain):
             # Load the existing brain file
-            self.alice.bootstrap(brainFile=self.alice_brain)
+            self.alice_bot.bootstrap(brainFile=self.alice_bot_brain)
         else:
             # Create a new brain file
-            self.alice.saveBrain(self.alice_brain)
+            self.alice_bot.saveBrain(self.alice_bot_brain)
 
 
     @alice.command(name="speak")
@@ -150,4 +155,13 @@ class ChatterBox(commands.Cog):
         embed = discord.Embed.from_dict(response)
         # Send embed
         return await ctx.send(embed=embed)
+
+    @alice.command(name="reset")
+    @checks.is_owner()
+    async def reset_alice(self, ctx: commands.Context) -> None:
+        """Invoking this command will delete Alice's brain."""
+        # Delete the brain
+        os.remove(self.alice_bot_brain)
+        # Restart alice
+        self.setup_alice()
 
