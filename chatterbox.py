@@ -100,9 +100,24 @@ class ChatterBox(commands.Cog):
 
 
     def response_from_alice(self, text:str) -> str:
-        response = self.alice_bot.respond(text)
+        response = self.alice_bot.respond(self.clean_input_to_alice(text))
         self.alice_bot.saveBrain(self.alice_bot_brain)
         return response
+
+
+    @staticmethod
+    def clean_input_to_alice(text:str) -> str:
+        """Removes characters that confuse Alice
+        Parameters
+        ----------
+        text: str
+            Text to be clean.
+        Returns
+        -------
+        str
+            The cleaned text.
+        """
+        return text.replace("<","").replace("@","").replace(">","")
 
 
     def setup_alice(self):
@@ -110,9 +125,11 @@ class ChatterBox(commands.Cog):
         self.alice_bot = aiml.Kernel()
         self.alice_bot.setTextEncoding(None)
         chdir = os.path.join( aiml.__path__[0],'botdata','alice' )
-        self.alice_bot.bootstrap(learnFiles="startup.xml", commands="load alice", chdir=chdir)
+        self.alice_bot.bootstrap(learnFiles="startup.xml", 
+                commands="load alice", chdir=chdir)
         # Tell Alice it's name is the string Discord uses to mention users.
-        self.alice_bot.setBotPredicate("name", self.bot.user.mention)
+        self.alice_bot.setBotPredicate("name", 
+                self.clean_input_to_alice(self.bot.user.mention))
         # Setup/load brain file
         if os.path.isfile(self.alice_bot_brain):
             # Load the existing brain file
