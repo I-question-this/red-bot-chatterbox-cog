@@ -47,12 +47,11 @@ class ChatterBox(commands.Cog):
             except discord.ext.commands.errors.BadArgument:
                 words.append(word)
         text = " ".join(words)
-        print(text)
         return text
 
 
     @commands.command(name="speak")
-    async def main_speak(self, ctx: commands.Context, text: str) -> None:
+    async def main_speak(self, ctx: commands.Context, *words) -> None:
         """The main way to talk to Dad
 
         Parameters
@@ -60,6 +59,7 @@ class ChatterBox(commands.Cog):
         text: str
             The text to speak to the bot with.
         """
+        text = " ".join(words)
         response = await self.response_from_alice(ctx, text)
         await ctx.channel.send(response)
 
@@ -74,12 +74,13 @@ class ChatterBox(commands.Cog):
 
 
     @eliza.command(name="speak")
-    async def speak_to_eliza(self, ctx: commands.Context, text:str) -> None:
+    async def speak_to_eliza(self, ctx: commands.Context, *words) -> None:
         # Build response/talk to Eliza
         response = {}
         response['title'] = f"Dear {ctx.author.display_name},"
+        text = " ".join(words)
         response['description'] =\
-                f"{await self.response_from_eliza(ctx, test)}\n*--Eliza*"
+                f"{await self.response_from_eliza(ctx, text)}\n*--Eliza*"
         # Build embed
         embed = discord.Embed.from_dict(response)
         # Send embed
@@ -138,10 +139,11 @@ class ChatterBox(commands.Cog):
 
 
     @alice.command(name="speak")
-    async def speak_to_alice(self, ctx: commands.Context, text:str) -> None:
+    async def speak_to_alice(self, ctx: commands.Context, *words) -> None:
         # Build response/talk to Eliza
         response = {}
         response['title'] = f"Dear {ctx.author.display_name},"
+        text = " ".join(words)
         response['description'] = f"{await self.response_from_alice(ctx, text)}\n*--ALICE*"
         # Build embed
         embed = discord.Embed.from_dict(response)
