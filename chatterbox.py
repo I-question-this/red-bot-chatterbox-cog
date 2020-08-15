@@ -43,7 +43,7 @@ class ChatterBox(commands.Cog):
         for word in text.split():
             try:
                 member = await converter.convert(ctx, word)
-                words.append(f'"{member.nick}"')
+                words.append("-".join(member.nick.split()))
             except discord.ext.commands.errors.BadArgument:
                 words.append(word)
         text = " ".join(words)
@@ -128,7 +128,8 @@ class ChatterBox(commands.Cog):
         self.alice_bot.bootstrap(learnFiles="startup.xml", 
                 commands="load alice", chdir=chdir)
         # Tell Alice it's name is the string Discord uses to mention users.
-        self.alice_bot.setBotPredicate("name", f'"{self.bot.user.name}"')
+        self.alice_bot.setBotPredicate(
+                "name", "-".join(self.bot.user.name.split()))
         # Setup/load brain file
         if os.path.isfile(self.alice_bot_brain):
             # Load the existing brain file
