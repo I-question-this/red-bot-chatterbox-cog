@@ -51,38 +51,18 @@ class ChatterBox(commands.Cog):
         return text
 
 
+    @commands.command(name="speak")
+    async def main_speak(self, ctx: commands.Context, text: str) -> None:
+        """The main way to talk to Dad
 
-    @commands.Cog.listener()
-    async def on_message(self, message: discord.message) -> None:
-        """Listen to every message ever.
-        This will only respond to message this bot is mentioned in however.
+        Parameters
+        ----------
+        text: str
+            The text to speak to the bot with.
         """
-        if isinstance(message.channel, discord.abc.PrivateChannel):
-            return
-        author = message.author
-        valid_user = isinstance(author, discord.Member) and not author.bot
-        if not valid_user:
-            return
-        if await self.bot.is_automod_immune(message):
-            return
+        response = await self.response_from_alice(ctx, text)
+        await ctx.channel.send(response)
 
-        if self.bot.user.mentioned_in(message):
-            class FakeContext:
-                """A Context object is required for converting mention strings
-                to member objects so we can get their nickname
-                """
-                def __init__(self, bot, message):
-                    self.bot = bot
-                    self.guild = message.guild
-                    self.message = message
-
-
-            fake_context = FakeContext(self.bot, message)
-            response = await self.response_from_alice(fake_context, message.content)
-            async with message.channel.typing():
-                await asyncio.sleep(random.randint(1, 3))
-                await message.channel.send(f"{author.mention} {response}")
-   
 
     @commands.group()
     async def eliza(self, ctx: commands.Context) -> None:
