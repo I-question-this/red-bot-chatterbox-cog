@@ -14,6 +14,10 @@ from .eliza.eliza import eliza as Eliza
 
 log = logging.getLogger("red.chatterbox")
 
+FILE_DIR = os.path.dirname(os.path.abspath(__file__))
+ALICE_LEARN_FILES_DIR = os.path.join(FILE_DIR, "alice")
+
+
 class ChatterBox(commands.Cog):
     """ChatterBox cog"""
 
@@ -124,9 +128,8 @@ class ChatterBox(commands.Cog):
         # Load up default ALICE
         self.alice_bot = aiml.Kernel()
         self.alice_bot.setTextEncoding(None)
-        chdir = os.path.join( aiml.__path__[0],'botdata','alice' )
         self.alice_bot.bootstrap(learnFiles="startup.xml", 
-                commands="load alice", chdir=chdir)
+                commands="load alice", chdir=ALICE_LEARN_FILES_DIR)
         # Tell Alice it's name is the string Discord uses to mention users.
         self.alice_bot.setBotPredicate(
                 "name", "-".join(self.bot.user.name.split()))
