@@ -26,6 +26,32 @@ class ChatterBox(commands.Cog):
         self.eliza_bot = Eliza()
 
 
+    @staticmethod
+    async def clean_input(ctx, text:str) -> str:
+        """Removes characters that confuse bots
+        Parameters
+        ----------
+        text: str
+            Text to be clean.
+        Returns
+        -------
+        str
+            The cleaned text.
+        """
+        words = list()
+        converter = commands.MemberConverter()
+        for word in text.split():
+            try:
+                member = await converter.convert(ctx, word)
+                words.append(f'"member.nick"')
+            except discord.ext.commands.errors.BadArgument:
+                words.append(word)
+        text = " ".join(words)
+        print(text)
+        return text
+
+
+
     @commands.Cog.listener()
     async def on_message(self, message: discord.message) -> None:
         """Listen to every message ever.
@@ -41,7 +67,18 @@ class ChatterBox(commands.Cog):
             return
 
         if self.bot.user.mentioned_in(message):
-            response = self.response_from_alice(message.content)
+            class FakeContext:
+                """A Context object is required for converting mention strings
+                to member objects so we can get their nickname
+                """
+                def __init__(self, bot, message):
+                    self.bot = bot
+                    self.guild = message.guild
+                    self.message = message
+
+
+            fake_context = FakeContext(self.bot, message)
+            response = await self.response_from_alice(fake_context, message.content)
             async with message.channel.typing():
                 await asyncio.sleep(random.randint(1, 3))
                 await message.channel.send(f"{author.mention} {response}")
@@ -52,8 +89,8 @@ class ChatterBox(commands.Cog):
         """Eliza commands"""
 
 
-    def response_from_eliza(self, text:str) -> str:
-        return self.eliza_bot.respond(text)
+    async def response_from_eliza(self, ctx, text:str) -> str:
+        return self.eliza_bot.respond(await self.clean_input(ctx, text))
 
 
     @eliza.command(name="speak")
@@ -61,7 +98,8 @@ class ChatterBox(commands.Cog):
         # Build response/talk to Eliza
         response = {}
         response['title'] = f"Dear {ctx.author.display_name},"
-        response['description'] = f"{self.response_from_eliza(test)}\n*--Eliza*"
+        response['description'] =\
+                f"{await self.response_from_eliza(ctx, test)}\n*--Eliza*"
         # Build embed
         embed = discord.Embed.from_dict(response)
         # Send embed
@@ -95,25 +133,10 @@ class ChatterBox(commands.Cog):
         """Alice commands"""
 
 
-    def response_from_alice(self, text:str) -> str:
-        response = self.alice_bot.respond(self.clean_input_to_alice(text))
+    async def response_from_alice(self, ctx, text:str) -> str:
+        response = self.alice_bot.respond(await self.clean_input(ctx, text))
         self.alice_bot.saveBrain(self.alice_bot_brain)
         return response
-
-
-    @staticmethod
-    def clean_input_to_alice(text:str) -> str:
-        """Removes characters that confuse Alice
-        Parameters
-        ----------
-        text: str
-            Text to be clean.
-        Returns
-        -------
-        str
-            The cleaned text.
-        """
-        return text.replace("<","").replace("@","").replace(">","")
 
 
     def setup_alice(self):
@@ -124,8 +147,7 @@ class ChatterBox(commands.Cog):
         self.alice_bot.bootstrap(learnFiles="startup.xml", 
                 commands="load alice", chdir=chdir)
         # Tell Alice it's name is the string Discord uses to mention users.
-        self.alice_bot.setBotPredicate("name", 
-                self.clean_input_to_alice(self.bot.user.mention))
+        self.alice_bot.setBotPredicate("name", f'"self.bot.user.name"')
         # Setup/load brain file
         if os.path.isfile(self.alice_bot_brain):
             # Load the existing brain file
@@ -140,7 +162,7 @@ class ChatterBox(commands.Cog):
         # Build response/talk to Eliza
         response = {}
         response['title'] = f"Dear {ctx.author.display_name},"
-        response['description'] = f"{self.response_from_alice(text)}\n*--ALICE*"
+        response['description'] = f"{await self.response_from_alice(ctx, text)}\n*--ALICE*"
         # Build embed
         embed = discord.Embed.from_dict(response)
         # Send embed
