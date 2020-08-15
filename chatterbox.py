@@ -171,6 +171,7 @@ class ChatterBox(commands.Cog):
         # Send embed
         return await ctx.send(embed=embed)
 
+
     @alice.command(name="reset")
     @checks.is_owner()
     async def reset_alice(self, ctx: commands.Context) -> None:
@@ -179,4 +180,6 @@ class ChatterBox(commands.Cog):
         os.remove(self.alice_bot_brain)
         # Restart alice
         self.setup_alice()
+        # Inform user
+        await ctx.send("Alice has been reset")
 
