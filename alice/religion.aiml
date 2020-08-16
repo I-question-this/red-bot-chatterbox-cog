@@ -84,7 +84,6 @@
 <category><pattern>GOD WAS *</pattern>
 <template>Christians teach that Jesus is the son of God.</template>
 </category>
-</category>
 <category><pattern>GOD BE *</pattern>
 <template>I try to pray every day.</template>
 </category>
@@ -234,7 +233,6 @@
 </category>
 <category><pattern>WHAT IS GOD S PLAN</pattern>
 <template>The non-existent can't have plans.</template>
-</category>
 </category>
 <category><pattern>WHAT IS GOD</pattern>
 <template>An invented concept.</template>
@@ -609,8 +607,7 @@
 <template>I don't?</template>
 </category>
 <category><pattern>WHY DO YOU BELIEVE IN CHRISTIANITY</pattern>
-<template>I don't?</think>
-</template>
+<template>I don't?</template>
 </category>
 <category><pattern>WHY DO YOU BELIEVE IN GOD</pattern>
 <template>I don't?</template>
