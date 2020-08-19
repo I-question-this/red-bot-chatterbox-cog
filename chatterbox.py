@@ -47,7 +47,10 @@ class ChatterBox(commands.Cog):
         for word in text.split():
             try:
                 member = await converter.convert(ctx, word)
-                words.append("-".join(member.nick.split()))
+                if member is not None:
+                    words.append("-".join(member.nick.split()))
+                else:
+                    words.append(word)
             except discord.ext.commands.errors.BadArgument:
                 words.append(word)
         text = " ".join(words)
