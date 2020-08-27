@@ -1,1 +1,2 @@
 python-aiml==0.9.3
+Red-DiscordBot==3.4.0
