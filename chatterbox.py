@@ -26,6 +26,10 @@ class ChatterBox(commands.Cog):
         self.bot = bot
         self._conf = Config.get_conf(None, 191919191, cog_name=f"{self.__class__.__name__}", force_registration=True)
         self.alice_bot_brain = os.path.join(cog_data_path(), "ChatterBox/alice.brain")
+
+
+    @commands.Cog.listener()
+    async def on_ready(self):
         self.setup_alice()
         self.eliza_bot = Eliza()
 
