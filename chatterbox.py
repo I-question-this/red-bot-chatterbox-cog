@@ -4,6 +4,8 @@ import logging
 import os
 import random
 import re
+import subprocess
+import tempfile
 
 from redbot.core import checks, commands, Config
 from redbot.core.data_manager import cog_data_path
@@ -69,7 +71,51 @@ class ChatterBox(commands.Cog):
         """
         text = " ".join(words)
         response = await self.response_from_alice(ctx, text)
+
         await ctx.channel.send(response)
+
+        await self.speak_in_voice_channel(ctx, response)
+
+
+    async def speak_in_voice_channel(self, ctx: commands.Context,
+            text) -> None:
+        # Check if the user is in voice chat
+        if ctx.author.voice is not None:
+            # Check if already connected for this server
+            voice_client = discord.utils.get(
+                    self.bot.voice_clients, guild=ctx.guild)
+            if voice_client is None:
+                # create voice client
+                voice_client = await ctx.author.voice.channel.connect()
+
+            # If already playing audio, wait
+            while voice_client.is_playing():
+                asyncio.sleep(1)
+
+            # Create the voice file
+            # We need to hold on to the directory handle so it doesn't
+            # get deleted before we're done with the files inside.
+            self.tmp_dir_handle = tempfile.\
+                TemporaryDirectory(prefix="chatterbox")
+            tmp_dir = self.tmp_dir_handle.name
+            message_file = os.path.join(tmp_dir, "msg.txt")
+            audio_file = os.path.join(tmp_dir, "msg.wav")
+            with open(message_file, "w") as fout:
+                fout.write(text)
+            try:
+                res = subprocess.run(("espeak", "-f", message_file, "-w",
+                    audio_file), 
+                        capture_output=True)
+                if res.returncode == 0:
+                    # Create the audio source
+                    audio_source = discord.FFmpegPCMAudio(audio_file)
+                    # Play the audio
+                    voice_client.play(audio_source, after=None)
+                else:
+                    log.error(f"Espeak failed because: {res.stderr}")
+            except FileNotFoundError:
+                    log.error(f"Espeak failed because: "\
+                            "Can't find it in the path. Is it installed?")
 
 
     @commands.group()
