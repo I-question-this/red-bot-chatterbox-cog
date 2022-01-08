@@ -72,6 +72,9 @@ class ChatterBox(commands.Cog):
         text = " ".join(words)
         response = await self.response_from_alice(ctx, text)
 
+        # Record message and response for debugging
+        log.info(f"{text} -> {response}")
+
         await ctx.channel.send(response)
 
         await self.speak_in_voice_channel(ctx, response)
@@ -174,7 +177,8 @@ class ChatterBox(commands.Cog):
         return response
 
 
-    def setup_alice(self):
+    @alice.command(name="setup")
+    async def setup_alice(self, ctx=None):
         # Load up default ALICE
         self.alice_bot = aiml.Kernel()
         self.alice_bot.setTextEncoding(None)
@@ -190,6 +194,10 @@ class ChatterBox(commands.Cog):
         else:
             # Create a new brain file
             self.alice_bot.saveBrain(self.alice_bot_brain)
+
+        # If invoked via a command, inform the caller
+        if ctx is not None:
+            await ctx.send("Alice is setup")
 
 
     @alice.command(name="speak")
