@@ -77,7 +77,9 @@ class ChatterBox(commands.Cog):
 
         await ctx.channel.send(response)
 
-        await self.speak_in_voice_channel(ctx, response)
+        # If within a guild and not a DM
+        if ctx.guild is not None:
+            await self.speak_in_voice_channel(ctx, response)
 
 
     async def speak_in_voice_channel(self, ctx: commands.Context,
