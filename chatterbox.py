@@ -176,7 +176,10 @@ class ChatterBox(commands.Cog):
     async def response_from_alice(self, ctx, text:str) -> str:
         response = self.alice_bot.respond(await self.clean_input(ctx, text))
         self.alice_bot.saveBrain(self.alice_bot_brain)
-        return response
+        if response == "":
+            return "<speechless>"
+        else:
+            return response
 
 
     @alice.command(name="setup")
