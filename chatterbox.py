@@ -95,7 +95,7 @@ class ChatterBox(commands.Cog):
 
             # If already playing audio, wait
             while voice_client.is_playing():
-                asyncio.sleep(1)
+                await asyncio.sleep(1)
 
             # Create the voice file
             # We need to hold on to the directory handle so it doesn't
