@@ -75,7 +75,7 @@ class ChatterBox(commands.Cog):
         # Record message and response for debugging
         log.info(f"{text} -> {response}")
 
-        await ctx.channel.send(response)
+        await ctx.reply(response)
 
         # If within a guild and not a DM
         if ctx.guild is not None:
