@@ -32,7 +32,7 @@ class ChatterBox(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
-        self.setup_alice()
+        await self.setup_alice()
         self.eliza_bot = Eliza()
 
 
