@@ -1,5 +1,5 @@
 from .chatterbox import ChatterBox
 
-def setup(bot):
-    bot.add_cog(ChatterBox(bot))
+async def setup(bot):
+    await bot.add_cog(ChatterBox(bot))
 
